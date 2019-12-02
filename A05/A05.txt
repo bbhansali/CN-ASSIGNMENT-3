@@ -1,0 +1,49 @@
+Question A05
+
+Team 16
+ARITRA RAY 1KS17CS012
+BHAVESH BHANSALI 1KS17CS016
+DARSHAN S 1KS17CS016
+
+
+X=2(usn 012) +10=12
+y=x//2=6
+
+
+
+Machine A address - 192.168.56.1
+Machine B address - 10.0.2.15
+machine C - www.google.com
+
+
+
+iptables -A INPUT -m limit --limit 42/min --limit-burst 6 -p icmp --icmp-type echo-reply-s 192.168.56.1 -j DROP(typed in machine B)
+
+
+
+The above command uses j drop to drop packets which are appended to input chain,and are of type echo reply coming from source -192.168.56.1.
+A new token in generated every 60/42=1.43sec(approx.).
+j DROP drops the packet if there is a token available.
+As tokens are generated at rate 1 token per 1.43seconds and the burst is filled with token in the starting that means that 6 tokens are available at very first second.
+first 16 packets(16seconds) are dropped as atleast one token is available at that time.
+at 18 second 18 tockens are avialable(6+(18/1.43)) so first 18 packets are dropped but at 19th second no token is available hence 19th packet is accepted then 23rd packet is accepted and so on.
+
+
+ping 192.168.56.1 -c 60; sleep 30; ping 192.168.56.1
+
+
+when the above command is used on machine B(10.0.2.15)
+its starts pinging A for 60 seconds at the rate of 1 ping/sec
+after that it sleeps for 30 seconds so there the burst will be full again as in 30 seconds 30/1.43 = 21 tokens can be generated but as the burst size is only 6 therefore only 6 tokens are generated as burst is the maximum capacity for storing the tokens.
+and again B pings A for 60 seconds.
+
+
+
+As b is using j-DROP only 12 packets are accepted in first and second min as the burst is full because of the 30 second sleep time.
+
+
+
+ping www.google.com -c 60
+
+
+using the above command B pings google for 60 sec in there is no packet drop as j DROP is used only for machine A.  
